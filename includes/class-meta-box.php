@@ -45,8 +45,9 @@ class WP_Nexus_Meta_Box {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( 'wp_nexus_meta_box', 'wp_nexus_meta_box_nonce' );
 
-		$seo_nexus_type = get_post_meta( $post->ID, '_seo_nexus_type', true );
-		$seo_nexus_keyword = get_post_meta( $post->ID, '_seo_nexus_keyword', true );
+		$seo_nexus_type          = get_post_meta( $post->ID, '_seo_nexus_type', true );
+		$seo_nexus_keyword       = get_post_meta( $post->ID, '_seo_nexus_keyword', true );
+		$seo_nexus_parent_keyword = get_post_meta( $post->ID, '_seo_nexus_parent_keyword', true );
 
 		?>
 		<p>
@@ -62,6 +63,11 @@ class WP_Nexus_Meta_Box {
 			<label for="seo-nexus-keyword"><strong><?php _e( 'Keyword', 'wp-nexus' ); ?></strong></label>
 			<input type="text" id="seo-nexus-keyword" name="seo_nexus_keyword" value="<?php echo esc_attr( $seo_nexus_keyword ); ?>" style="width: 100%; margin-top: 5px;" autocomplete="off" />
 			<span class="description"><?php _e( 'Start typing to see existing keywords or add a new one.', 'wp-nexus' ); ?></span>
+		</p>
+		<p>
+			<label for="seo-nexus-parent-keyword"><strong><?php _e( 'Parent Keyword', 'wp-nexus' ); ?></strong></label>
+			<input type="text" id="seo-nexus-parent-keyword" name="seo_nexus_parent_keyword" value="<?php echo esc_attr( $seo_nexus_parent_keyword ); ?>" style="width: 100%; margin-top: 5px;" autocomplete="off" />
+			<span class="description"><?php _e( 'Link to parent pillar keyword.', 'wp-nexus' ); ?></span>
 		</p>
 		<?php
 	}
@@ -89,6 +95,10 @@ class WP_Nexus_Meta_Box {
 
 		if ( isset( $_POST['seo_nexus_keyword'] ) ) {
 			update_post_meta( $post_id, '_seo_nexus_keyword', sanitize_text_field( $_POST['seo_nexus_keyword'] ) );
+		}
+
+		if ( isset( $_POST['seo_nexus_parent_keyword'] ) ) {
+			update_post_meta( $post_id, '_seo_nexus_parent_keyword', sanitize_text_field( $_POST['seo_nexus_parent_keyword'] ) );
 		}
 	}
 }
