@@ -1,0 +1,13 @@
+#wp-nexus-meta-box .ui-autocomplete {
+	max-height: 200px;
+	overflow-y: auto;
+	z-index: 100000;
+}
+
+#wp-nexus-meta-box .ui-menu-item {
+	padding: 5px 10px;
+}
+
+#wp-nexus-meta-box .ui-menu-item:hover {
+	background: #f0f0f0;
+}
