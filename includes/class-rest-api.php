@@ -68,8 +68,9 @@ class WP_Nexus_REST_API {
 	public function check_api_key() {
 		$headers = $this->get_headers();
 
-		if ( isset( $headers['X-API-Key'] ) ) {
-			$api_key = $headers['X-API-Key'];
+		// Check for X-API-Key header (now uppercase)
+		if ( isset( $headers['X-API-KEY'] ) ) {
+			$api_key = $headers['X-API-KEY'];
 		} else {
 			return false;
 		}
@@ -80,9 +81,12 @@ class WP_Nexus_REST_API {
 	private function get_headers() {
 		if ( function_exists( 'apache_request_headers' ) ) {
 			$headers = apache_request_headers();
-			$headers = array_combine( array_map( 'ucwords', array_keys( $headers ) ), array_values( $headers ) );
+			// Convert header keys to uppercase with hyphens for case-insensitive matching
+			$headers = array_combine( array_map( 'strtoupper', array_keys( $headers ) ), array_values( $headers ) );
 		} else {
 			$headers = isset( $_SERVER ) ? $_SERVER : array();
+			// Also handle $_SERVER which uses HTTP_X_API_KEY format
+			$headers = array_combine( array_map( 'strtoupper', array_keys( $headers ) ), array_values( $headers ) );
 		}
 
 		return $headers;
