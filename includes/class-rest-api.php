@@ -32,11 +32,37 @@ class WP_Nexus_REST_API {
 				'args'                => array(
 					'type' => array(
 						'required'          => false,
-						'sanitize_callback' => 'sanitize_text_field',
+						'type'              => 'array',
+						'items'             => array(
+							'type' => 'string',
+							'enum' => array( 'pillar', 'sub-pillar', 'cluster' ),
+						),
+						'sanitize_callback' => array( $this, 'sanitize_types' ),
 					),
 				),
 			)
 		);
+	}
+
+	/**
+	 * Sanitize type parameter - accepts array or comma-separated string
+	 */
+	public function sanitize_types( $types ) {
+		if ( is_string( $types ) ) {
+			$types = explode( ',', $types );
+		}
+
+		$valid_types = array( 'pillar', 'sub-pillar', 'cluster' );
+		$sanitized    = array();
+
+		foreach ( (array) $types as $type ) {
+			$type = trim( $type );
+			if ( in_array( $type, $valid_types, true ) ) {
+				$sanitized[] = $type;
+			}
+		}
+
+		return $sanitized;
 	}
 
 	public function check_api_key() {
@@ -63,7 +89,7 @@ class WP_Nexus_REST_API {
 	}
 
 	public function get_links( $request ) {
-		$type = $request->get_param( 'type' );
+		$types = $request->get_param( 'type' );
 
 		$post_types = get_post_types( array( 'public' => true ), 'names' );
 
@@ -71,34 +97,42 @@ class WP_Nexus_REST_API {
 			'post_type'      => array_values( $post_types ),
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
-			'meta_query'     => array(
-				array(
-					'key'     => '_seo_nexus_type',
-					'value'   => array( 'pillar', 'sub-pillar' ),
-					'compare' => 'IN',
-				),
-			),
 		);
 
-		if ( $type && in_array( $type, array( 'pillar', 'sub-pillar' ), true ) ) {
+		// Default: get all types if no filter
+		$valid_types = array( 'pillar', 'sub-pillar', 'cluster' );
+
+		if ( ! empty( $types ) && is_array( $types ) ) {
+			// Filter by provided types
 			$args['meta_query'] = array(
 				array(
-					'key'   => '_seo_nexus_type',
-					'value' => $type,
+					'key'     => '_seo_nexus_type',
+					'value'   => $types,
+					'compare' => 'IN',
+				),
+			);
+		} else {
+			// Get all types
+			$args['meta_query'] = array(
+				array(
+					'key'     => '_seo_nexus_type',
+					'value'   => $valid_types,
+					'compare' => 'IN',
 				),
 			);
 		}
 
-		$query  = new WP_Query( $args );
-		$links  = array();
+		$query = new WP_Query( $args );
+		$links = array();
 
 		foreach ( $query->posts as $post ) {
 			$seo_nexus_type = get_post_meta( $post->ID, '_seo_nexus_type', true );
 
 			if ( $seo_nexus_type ) {
 				$links[] = array(
-					'url'  => get_permalink( $post->ID ),
-					'type' => $seo_nexus_type,
+					'url'       => get_permalink( $post->ID ),
+					'type'      => $seo_nexus_type,
+					'post_type' => $post->post_type,
 				);
 			}
 		}

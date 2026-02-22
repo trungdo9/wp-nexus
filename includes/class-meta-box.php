@@ -20,6 +20,7 @@ class WP_Nexus_Meta_Box {
 	private function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_meta' ) );
+		add_action( 'save_post', array( $this, 'sync_from_seo_plugins' ), 20 );
 	}
 
 	public function add_meta_boxes() {
@@ -100,5 +101,87 @@ class WP_Nexus_Meta_Box {
 		if ( isset( $_POST['seo_nexus_parent_keyword'] ) ) {
 			update_post_meta( $post_id, '_seo_nexus_parent_keyword', sanitize_text_field( $_POST['seo_nexus_parent_keyword'] ) );
 		}
+	}
+
+	/**
+	 * Sync keyword from Yoast/Rank Math to WP Nexus
+	 * Priority: Rank Math -> Yoast
+	 * Only sync if WP Nexus keyword is empty
+	 */
+	public function sync_from_seo_plugins( $post_id ) {
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
+
+		// Only sync for public post types
+		$post_type = get_post_type( $post_id );
+		if ( ! $post_type || ! is_post_type_publiclyQueryable( $post_type ) ) {
+			return $post_id;
+		}
+
+		// Check if WP Nexus keyword already exists
+		$existing = get_post_meta( $post_id, '_seo_nexus_keyword', true );
+		if ( ! empty( $existing ) ) {
+			return $post_id;
+		}
+
+		// Priority 1: Rank Math
+		$keyword = get_post_meta( $post_id, 'rank_math_focus_keyword', true );
+
+		// Priority 2: Yoast SEO
+		if ( empty( $keyword ) ) {
+			$keyword = get_post_meta( $post_id, '_yoast_wpseo_focuskw', true );
+		}
+
+		// Sync if found
+		if ( ! empty( $keyword ) ) {
+			update_post_meta( $post_id, '_seo_nexus_keyword', sanitize_text_field( $keyword ) );
+		}
+
+		return $post_id;
+	}
+
+	/**
+	 * Bulk sync keywords from all posts
+	 */
+	public static function bulk_sync_keywords() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return 0;
+		}
+
+		$post_types = get_post_types( array( 'public' => true ), 'names' );
+
+		$posts = get_posts(
+			array(
+				'post_type'      => array_values( $post_types ),
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+			)
+		);
+
+		$synced = 0;
+
+		foreach ( $posts as $post ) {
+			// Skip if already has keyword
+			$existing = get_post_meta( $post->ID, '_seo_nexus_keyword', true );
+			if ( ! empty( $existing ) ) {
+				continue;
+			}
+
+			// Rank Math
+			$keyword = get_post_meta( $post->ID, 'rank_math_focus_keyword', true );
+
+			// Yoast
+			if ( empty( $keyword ) ) {
+				$keyword = get_post_meta( $post->ID, '_yoast_wpseo_focuskw', true );
+			}
+
+			if ( ! empty( $keyword ) ) {
+				update_post_meta( $post->ID, '_seo_nexus_keyword', sanitize_text_field( $keyword ) );
+				++$synced;
+			}
+		}
+
+		return $synced;
 	}
 }

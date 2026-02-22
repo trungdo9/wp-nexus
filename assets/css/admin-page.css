@@ -1,0 +1,318 @@
+.wp-nexus-admin {
+	max-width: 1200px;
+	margin-top: 20px;
+}
+
+.wp-nexus-admin h1 {
+	margin-bottom: 20px;
+}
+
+.wp-nexus-endpoint-info,
+.wp-nexus-sitemap {
+	background: #fff;
+	padding: 20px;
+	margin-bottom: 20px;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+}
+
+.wp-nexus-endpoint-info h2,
+.wp-nexus-sitemap h2 {
+	margin: 0;
+	padding: 0;
+	border: none;
+	display: inline-block;
+}
+
+.sitemap-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 15px;
+}
+
+.sitemap-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.sitemap-actions .button {
+	font-size: 12px;
+}
+
+.wp-nexus-endpoint-info code {
+	background: #f1f1f1;
+	padding: 4px 8px;
+	border-radius: 4px;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.wp-nexus-endpoint-info td {
+	vertical-align: middle;
+}
+
+.copy-btn {
+	vertical-align: middle;
+}
+
+/* Sitemap Styles */
+.sitemap-tree {
+	padding-left: 10px;
+}
+
+.sitemap-node {
+	margin: 4px 0;
+	border-radius: 4px;
+	border-left: 3px solid;
+	transition: background-color 0.2s ease;
+}
+
+.sitemap-node:hover {
+	background-color: #f5f5f5;
+}
+
+.sitemap-node.pillar {
+	background: #e3f2fd;
+	border-left-color: #1976d2;
+}
+
+.sitemap-node.sub-pillar {
+	background: #f3e5f5;
+	border-left-color: #7b1fa2;
+	margin-left: 24px;
+}
+
+.sitemap-node.cluster {
+	background: #e8f5e9;
+	border-left-color: #388e3c;
+	margin-left: 24px;
+}
+
+.sitemap-node .node-header {
+	display: flex;
+	align-items: center;
+	padding: 6px 10px;
+	cursor: pointer;
+}
+
+.sitemap-node .node-header:hover {
+	background-color: rgba(0, 0, 0, 0.03);
+}
+
+.toggle-icon {
+	width: 20px;
+	text-align: center;
+	font-size: 10px;
+	color: #666;
+	flex-shrink: 0;
+}
+
+.toggle-icon.expandable {
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.toggle-icon.expandable:hover {
+	color: #333;
+}
+
+.node-link {
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	flex: 1;
+	color: #333;
+	margin: 0 8px;
+}
+
+.node-link:hover {
+	text-decoration: none;
+	color: #000;
+}
+
+.node-title {
+	font-weight: 500;
+}
+
+.sitemap-node.pillar > .node-header .node-title {
+	font-weight: 600;
+}
+
+.sitemap-node.sub-pillar > .node-header .node-title {
+	font-weight: 500;
+}
+
+.node-keyword {
+	font-size: 11px;
+	color: #666;
+	background: rgba(255, 255, 255, 0.8);
+	padding: 2px 8px;
+	border-radius: 10px;
+	white-space: nowrap;
+	margin-left: auto;
+	margin-right: 8px;
+}
+
+.node-count {
+	font-size: 11px;
+	color: #888;
+	background: rgba(0, 0, 0, 0.05);
+	padding: 2px 8px;
+	border-radius: 10px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.sitemap-children {
+	margin-left: 12px;
+	border-left: 1px dashed #ddd;
+	padding-left: 8px;
+}
+
+/* Collapsible indicators */
+.sitemap-node[data-type="pillar"] > .node-header::before {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: 0;
+	background: #1976d2;
+	flex-shrink: 0;
+}
+
+.sitemap-node[data-type="sub-pillar"] > .node-header::before {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: 0;
+	background: #7b1fa2;
+	flex-shrink: 0;
+}
+
+.sitemap-node[data-type="cluster"] > .node-header::before {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: 0;
+	background: #388e3c;
+	flex-shrink: 0;
+}
+
+/* SEO Score Badges */
+.seo-score {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28px;
+	height: 20px;
+	padding: 0 6px;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 600;
+	margin-left: 8px;
+}
+
+.seo-score.good {
+	background: #4caf50;
+	color: white;
+}
+
+.seo-score.ok {
+	background: #ff9800;
+	color: white;
+}
+
+.seo-score.poor {
+	background: #f44336;
+	color: white;
+}
+
+.seo-issues-icon {
+	margin-left: 2px;
+	font-size: 10px;
+}
+
+/* SEO Tools Section */
+.wp-nexus-seo-tools {
+	background: #fff;
+	padding: 20px;
+	margin-bottom: 20px;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+}
+
+.wp-nexus-seo-tools h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 15px;
+}
+
+/* Documentation Section */
+.wp-nexus-docs {
+	background: #fff;
+	padding: 20px;
+	margin-bottom: 20px;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+}
+
+.wp-nexus-docs h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 15px;
+}
+
+.wp-nexus-docs-section {
+	margin-bottom: 20px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #eee;
+}
+
+.wp-nexus-docs-section:last-child {
+	margin-bottom: 0;
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+.wp-nexus-docs-section h3 {
+	margin-top: 0;
+	font-size: 16px;
+}
+
+.wp-nexus-docs-section ul {
+	margin-left: 20px;
+}
+
+.wp-nexus-docs-section li {
+	margin-bottom: 8px;
+}
+
+.wp-nexus-docs-section code {
+	background: #f1f1f1;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 13px;
+}
+
+.wp-nexus-docs-section pre {
+	background: #f1f1f1;
+	padding: 12px;
+	border-radius: 4px;
+	overflow-x: auto;
+	margin: 10px 0;
+}
+
+.wp-nexus-docs-section pre code {
+	background: none;
+	padding: 0;
+}

@@ -45,10 +45,12 @@ class WP_Nexus {
 		require_once WP_NEXUS_PATH . 'includes/class-meta-box.php';
 		require_once WP_NEXUS_PATH . 'includes/class-rest-api.php';
 		require_once WP_NEXUS_PATH . 'includes/class-keyword-manager.php';
+		require_once WP_NEXUS_PATH . 'includes/class-admin-page.php';
 
 		WP_Nexus_Meta_Box::get_instance();
 		WP_Nexus_REST_API::get_instance();
 		WP_Nexus_Keyword_Manager::get_instance();
+		WP_Nexus_Admin_Page::get_instance();
 	}
 }
 
