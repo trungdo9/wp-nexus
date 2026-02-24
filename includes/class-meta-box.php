@@ -115,7 +115,7 @@ class WP_Nexus_Meta_Box {
 
 		// Only sync for public post types
 		$post_type = get_post_type( $post_id );
-		if ( ! $post_type || ! is_post_type_publiclyQueryable( $post_type ) ) {
+		if ( ! $post_type || ! is_post_type_viewable( $post_type ) ) {
 			return $post_id;
 		}
 
