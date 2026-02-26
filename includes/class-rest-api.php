@@ -40,7 +40,45 @@ class WP_Nexus_REST_API {
 						'sanitize_callback' => array( $this, 'sanitize_types' ),
 					),
 				),
+				'schema' => array( $this, 'get_links_schema' ),
 			)
+		);
+	}
+
+	/**
+	 * Get links endpoint schema
+	 */
+	public function get_links_schema() {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'seo-nexus-links',
+			'type'       => 'array',
+			'items'      => array(
+				'type'       => 'object',
+				'properties' => array(
+					'url'       => array(
+						'type'        => 'string',
+						'description' => 'URL of the post',
+					),
+					'title'     => array(
+						'type'        => 'string',
+						'description' => 'Post title',
+					),
+					'keyword'   => array(
+						'type'        => 'string',
+						'description' => 'SEO nexus keyword',
+					),
+					'type'      => array(
+						'type'        => 'string',
+						'description' => 'Nexus type: pillar, sub-pillar, or cluster',
+						'enum'        => array( 'pillar', 'sub-pillar', 'cluster' ),
+					),
+					'post_type' => array(
+						'type'        => 'string',
+						'description' => 'WordPress post type',
+					),
+				),
+			),
 		);
 	}
 
@@ -68,10 +106,12 @@ class WP_Nexus_REST_API {
 	public function check_api_key() {
 		$headers = $this->get_headers();
 
-		// Check for X-API-Key header (now uppercase)
-		if ( isset( $headers['X-API-KEY'] ) ) {
-			$api_key = $headers['X-API-KEY'];
-		} else {
+		// Check for X-API-Key header - handle both apache_request_headers() and $_SERVER formats
+		// apache_request_headers(): X-API-Key -> X-API-KEY
+		// $_SERVER: HTTP_X_API_KEY (hyphens converted to underscores by PHP)
+		$api_key = $headers['X-API-KEY'] ?? $headers['HTTP_X_API_KEY'] ?? null;
+
+		if ( ! $api_key ) {
 			return false;
 		}
 
@@ -130,11 +170,14 @@ class WP_Nexus_REST_API {
 		$links = array();
 
 		foreach ( $query->posts as $post ) {
-			$seo_nexus_type = get_post_meta( $post->ID, '_seo_nexus_type', true );
+			$seo_nexus_type    = get_post_meta( $post->ID, '_seo_nexus_type', true );
+			$seo_nexus_keyword = get_post_meta( $post->ID, '_seo_nexus_keyword', true );
 
 			if ( $seo_nexus_type ) {
 				$links[] = array(
 					'url'       => get_permalink( $post->ID ),
+					'title'     => $post->post_title,
+					'keyword'   => $seo_nexus_keyword,
 					'type'      => $seo_nexus_type,
 					'post_type' => $post->post_type,
 				);
