@@ -21,6 +21,112 @@ class WP_Nexus_Meta_Box {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_meta' ) );
 		add_action( 'save_post', array( $this, 'sync_from_seo_plugins' ), 20 );
+
+		// Quick Edit column in Posts list
+		add_action( 'manage_posts_custom_column', array( $this, 'render_custom_column' ), 10, 2 );
+		add_action( 'manage_pages_custom_column', array( $this, 'render_custom_column' ), 10, 2 );
+		add_filter( 'manage_posts_columns', array( $this, 'add_custom_column' ) );
+		add_filter( 'manage_pages_columns', array( $this, 'add_custom_column' ) );
+
+		// Add quick edit fields
+		add_action( 'quick_edit_custom_box', array( $this, 'render_quick_edit_fields' ), 10, 2 );
+
+		// Save quick edit
+		add_action( 'wp_ajax_wp_nexus_quick_edit_save', array( $this, 'quick_edit_save' ) );
+	}
+
+	/**
+	 * Add custom column to posts/pages list
+	 */
+	public function add_custom_column( $columns ) {
+		$columns['wp_nexus_type'] = __( 'Nexus Type', 'wp-nexus' );
+		return $columns;
+	}
+
+	/**
+	 * Render custom column content
+	 */
+	public function render_custom_column( $column, $post_id ) {
+		if ( 'wp_nexus_type' === $column ) {
+			$nexus_type = get_post_meta( $post_id, '_seo_nexus_type', true );
+			$labels = array(
+				'pillar'     => __( 'Pillar', 'wp-nexus' ),
+				'sub-pillar' => __( 'Sub-Pillar', 'wp-nexus' ),
+				'cluster'   => __( 'Cluster', 'wp-nexus' ),
+			);
+
+			if ( $nexus_type && isset( $labels[ $nexus_type ] ) ) {
+				$class = 'nexus-' . $nexus_type;
+				echo '<span class="wp-nexus-badge ' . esc_attr( $class ) . '">' . esc_html( $labels[ $nexus_type ] ) . '</span>';
+			} else {
+				echo '<span class="wp-nexus-none">—</span>';
+			}
+		}
+	}
+
+	/**
+	 * Render quick edit fields
+	 */
+	public function render_quick_edit_fields( $column, $post_type_name ) {
+		if ( 'wp_nexus_type' !== $column ) {
+			return;
+		}
+
+		$nexus_type = '';
+		$nexus_keyword = '';
+
+		// Get current values if editing
+		if ( isset( $_GET['post'] ) ) {
+			$post_id = intval( $_GET['post'] );
+			$nexus_type    = get_post_meta( $post_id, '_seo_nexus_type', true );
+			$nexus_keyword = get_post_meta( $post_id, '_seo_nexus_keyword', true );
+		}
+		?>
+		<fieldset class="inline-edit-col-left">
+			<div class="inline-edit-col">
+				<label class="inline-edit-group">
+					<span class="title"><?php _e( 'Nexus Type', 'wp-nexus' ); ?></span>
+					<select name="seo_nexus_type">
+						<option value=""><?php _e( '— None —', 'wp-nexus' ); ?></option>
+						<option value="pillar" <?php selected( $nexus_type, 'pillar' ); ?>><?php _e( 'Pillar', 'wp-nexus' ); ?></option>
+						<option value="sub-pillar" <?php selected( $nexus_type, 'sub-pillar' ); ?>><?php _e( 'Sub-Pillar', 'wp-nexus' ); ?></option>
+						<option value="cluster" <?php selected( $nexus_type, 'cluster' ); ?>><?php _e( 'Cluster', 'wp-nexus' ); ?></option>
+					</select>
+				</label>
+				<label class="inline-edit-group">
+					<span class="title"><?php _e( 'Keyword', 'wp-nexus' ); ?></span>
+					<input type="text" name="seo_nexus_keyword" value="<?php echo esc_attr( $nexus_keyword ); ?>" />
+				</label>
+			</div>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Save quick edit via AJAX
+	 */
+	public function quick_edit_save() {
+		check_ajax_referer( 'wp_nexus_quick_edit', 'nonce' );
+
+		$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
+		$nexus_type = isset( $_POST['nexus_type'] ) ? sanitize_text_field( $_POST['nexus_type'] ) : '';
+		$nexus_keyword = isset( $_POST['nexus_keyword'] ) ? sanitize_text_field( $_POST['nexus_keyword'] ) : '';
+
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( 'Permission denied' );
+		}
+
+		if ( $nexus_type ) {
+			update_post_meta( $post_id, '_seo_nexus_type', $nexus_type );
+		} else {
+			delete_post_meta( $post_id, '_seo_nexus_type' );
+		}
+
+		if ( $nexus_keyword ) {
+			update_post_meta( $post_id, '_seo_nexus_keyword', $nexus_keyword );
+		}
+
+		wp_send_json_success();
 	}
 
 	public function add_meta_boxes() {

@@ -30,7 +30,7 @@ class WP_Nexus_REST_API {
 				'callback'            => array( $this, 'get_links' ),
 				'permission_callback' => array( $this, 'check_api_key' ),
 				'args'                => array(
-					'type' => array(
+					'type'   => array(
 						'required'          => false,
 						'type'              => 'array',
 						'items'             => array(
@@ -38,6 +38,13 @@ class WP_Nexus_REST_API {
 							'enum' => array( 'pillar', 'sub-pillar', 'cluster' ),
 						),
 						'sanitize_callback' => array( $this, 'sanitize_types' ),
+					),
+					'format' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'enum'              => array( 'json', 'xml' ),
+						'default'           => 'json',
+						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'schema' => array( $this, 'get_links_schema' ),
@@ -133,7 +140,9 @@ class WP_Nexus_REST_API {
 	}
 
 	public function get_links( $request ) {
-		$types = $request->get_param( 'type' );
+		$types  = $request->get_param( 'type' );
+		$format = $request->get_param( 'format' );
+		$format = $format ?: 'json';
 
 		$post_types = get_post_types( array( 'public' => true ), 'names' );
 
@@ -186,6 +195,36 @@ class WP_Nexus_REST_API {
 
 		wp_reset_postdata();
 
+		if ( 'xml' === $format ) {
+			return $this->render_xml( $links );
+		}
+
 		return rest_ensure_response( $links );
+	}
+
+	/**
+	 * Render links as XML (sitemap-style format)
+	 *
+	 * @param array $links Links array.
+	 * @return WP_REST_Response
+	 */
+	private function render_xml( $links ) {
+		$xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+		$xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+		foreach ( $links as $link ) {
+			$xml .= "  <url>\n";
+			$xml .= '    <loc>' . esc_url( $link['url'] ) . "</loc>\n";
+			$xml .= '    <title>' . esc_html( $link['title'] ) . "</title>\n";
+			$xml .= '    <keyword>' . esc_html( $link['keyword'] ) . "</keyword>\n";
+			$xml .= '    <type>' . esc_html( $link['type'] ) . "</type>\n";
+			$xml .= "  </url>\n";
+		}
+
+		$xml .= '</urlset>';
+
+		return new WP_REST_Response( $xml, 200, array(
+			'Content-Type' => 'application/xml; charset=' . get_bloginfo( 'charset' ),
+		) );
 	}
 }

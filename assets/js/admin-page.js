@@ -90,4 +90,24 @@ jQuery(document).ready(function($) {
 		$('.sitemap-children').slideUp(200);
 		$('.toggle-icon.expandable').html('&#9658;');
 	});
+
+	// ============================================
+	// Bulk Update - Select All functionality
+	// ============================================
+	$('#select-all-posts').on('change', function() {
+		var isChecked = $(this).prop('checked');
+		$('.post-checkbox').prop('checked', isChecked);
+	});
+
+	// Also toggle select-all when individual checkboxes change
+	$('.post-checkbox').on('change', function() {
+		var totalCheckboxes = $('.post-checkbox').length;
+		var checkedCheckboxes = $('.post-checkbox:checked').length;
+
+		if (totalCheckboxes === checkedCheckboxes) {
+			$('#select-all-posts').prop('checked', true);
+		} else {
+			$('#select-all-posts').prop('checked', false);
+		}
+	});
 });
